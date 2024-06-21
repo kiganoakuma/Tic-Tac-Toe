@@ -1,3 +1,5 @@
+const displayText = document.querySelector(".displayText");
+
 const Gameboard = () => {
   let board = ["", "", "", "", "", "", "", "", ""];
   const getBoard = () => board;
@@ -5,12 +7,14 @@ const Gameboard = () => {
   const makeMove = (index, mark) => {
     if (board[index] === "") {
       board[index] = mark;
+      displayText.textContent = "Three in a row wins!";
       return true;
     }
     return false;
   };
   const resetBoard = () => {
     board = ["", "", "", "", "", "", "", "", ""];
+    displayText.textContent = "Player 1 starts with X!";
   };
 
   return { getBoard, makeMove, resetBoard };
@@ -23,7 +27,6 @@ const Player = (name, mark) => {
 const GameController = () => {
   const player1 = Player("Player 1", "X");
   const player2 = Player("Player 2", "O");
-  const gameboard = Gameboard();
   let currentPlayer = player1;
   let gameActive = true;
 
@@ -57,11 +60,9 @@ const GameController = () => {
       const winner = checkWin();
       if (winner) {
         gameActive = false;
-        console.log(
-          `Game Over! ${
-            winner === "Tie" ? "It's a Tie!" : `${currentPlayer.name} Wins!`
-          }`
-        );
+        displayText.textContent = `Game Over! ${
+          winner === "Tie" ? "It's a Tie!" : `${currentPlayer.name} Wins!`
+        }`;
       } else {
         switchPlayer();
       }
@@ -77,3 +78,30 @@ const GameController = () => {
 };
 
 const game = GameController();
+const gameboard = Gameboard();
+
+const DisplayController = (() => {
+  const gameboardDiv = document.getElementById("gameboard");
+  const resetButton = document.getElementById("resetButton");
+  const render = () => {
+    gameboardDiv.innerHTML = "";
+    gameboard.getBoard().forEach((mark, index) => {
+      const cell = document.createElement("div");
+      cell.classList.add(`cell${index}`);
+      cell.textContent = mark;
+      resetButton.addEventListener("click", () => {
+        game.resetGame();
+        render();
+      });
+      cell.addEventListener("click", () => {
+        game.makeMove(index);
+        render();
+      });
+      gameboardDiv.appendChild(cell);
+    });
+  };
+
+  return { render };
+})();
+
+DisplayController.render();
